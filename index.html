@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>★My お気に入り管理</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", Meiryo, sans-serif;
+    background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%);
+    min-height: 100vh;
+    color: #333;
+    padding: 20px;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+  }
+
+  header {
+    background: linear-gradient(135deg, #9acd32 0%, #6ab023 100%);
+    color: white;
+    padding: 24px 28px;
+    text-align: center;
+    position: relative;
+  }
+
+  header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  header p {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-top: 6px;
+  }
+
+  /* ユーザーバー */
+  .user-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 28px;
+    background: #f3f9e8;
+    border-bottom: 1px solid #d9e8c2;
+    font-size: 14px;
+    flex-wrap: wrap;
+  }
+
+  .user-bar .label {
+    color: #4a7c1c;
+    font-weight: 700;
+  }
+
+  .user-bar .current-user {
+    background: #9acd32;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  .user-bar .spacer {
+    flex: 1;
+  }
+
+  .user-bar button {
+    background: white;
+    border: 1.5px solid #9acd32;
+    color: #4a7c1c;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .user-bar button:hover {
+    background: #9acd32;
+    color: white;
+  }
+
+  .form-section {
+    padding: 24px 28px;
+    background: #f9fafc;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .form-section h2 {
+    font-size: 16px;
+    margin-bottom: 14px;
+    color: #4a5568;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    color: #4a5568;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fff;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #9acd32;
+    box-shadow: 0 0 0 3px rgba(154, 205, 50, 0.2);
+  }
+
+  .add-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #9acd32 0%, #6ab023 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+    margin-top: 6px;
+  }
+
+  .add-btn:hover {
+    box-shadow: 0 4px 12px rgba(154, 205, 50, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .add-btn:active {
+    transform: translateY(0);
+  }
+
+  .search-section {
+    padding: 18px 28px;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .search-section input {
+    width: 100%;
+    padding: 11px 14px 11px 40px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>") no-repeat 14px center;
+  }
+
+  .search-section input:focus {
+    outline: none;
+    border-color: #9acd32;
+    box-shadow: 0 0 0 3px rgba(154, 205, 50, 0.2);
+  }
+
+  .list-section {
+    padding: 20px 28px 28px;
+  }
+
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .list-header h2 {
+    font-size: 16px;
+    color: #4a5568;
+  }
+
+  .count-badge {
+    background: #e8f5d6;
+    color: #4a7c1c;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: #9ca3af;
+  }
+
+  .empty-state .icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+  }
+
+  .favorite-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background: #fff;
+    transition: box-shadow 0.2s, transform 0.1s;
+  }
+
+  .favorite-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+
+  .favorite-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .favorite-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .favorite-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .favorite-link:hover .favorite-title {
+    color: #6ab023;
+    text-decoration: underline;
+  }
+
+  .favorite-url {
+    font-size: 12px;
+    color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+
+  .favorite-date {
+    font-size: 11px;
+    color: #9ca3af;
+  }
+
+  .delete-btn {
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .delete-btn:hover {
+    background: #dc2626;
+    color: white;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    background: #1f2937;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    max-width: 90%;
+    text-align: center;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .toast.error {
+    background: #dc2626;
+  }
+
+  .toast.success {
+    background: #059669;
+  }
+
+  /* ログイン画面 */
+  .login-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+  }
+
+  .login-box {
+    background: white;
+    border-radius: 16px;
+    padding: 32px 28px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .login-box h2 {
+    font-size: 20px;
+    color: #4a7c1c;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .login-box .subtitle {
+    text-align: center;
+    color: #6b7280;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .login-box .note {
+    background: #f3f9e8;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #4a7c1c;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .login-box input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    margin-bottom: 14px;
+  }
+
+  .login-box input:focus {
+    outline: none;
+    border-color: #9acd32;
+    box-shadow: 0 0 0 3px rgba(154, 205, 50, 0.2);
+  }
+
+  .login-box button {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #9acd32 0%, #6ab023 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .login-box .existing-users {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .login-box .existing-users h3 {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .user-chip {
+    display: inline-block;
+    background: #f3f9e8;
+    color: #4a7c1c;
+    padding: 6px 12px;
+    margin: 0 6px 6px 0;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .user-chip:hover {
+    border-color: #9acd32;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    body {
+      padding: 10px;
+    }
+    header {
+      padding: 20px;
+    }
+    header h1 {
+      font-size: 20px;
+    }
+    .user-bar,
+    .form-section,
+    .search-section,
+    .list-section {
+      padding-left: 18px;
+      padding-right: 18px;
+    }
+    .favorite-item {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .delete-btn {
+      width: 100%;
+      padding: 10px;
+    }
+    .favorite-title {
+      font-size: 14px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ログイン画面 -->
+<div class="login-overlay" id="loginOverlay" style="display:none;">
+  <div class="login-box">
+    <h2>★My お気に入り管理</h2>
+    <p class="subtitle">自分専用のお気に入りリストを使います</p>
+    <div class="note">
+      ユーザー名を入力してください。人ごとにリストが分かれるので、他の人のお気に入りは見えません。<br>
+      ※ 同じ名前を入力すれば、以前の自分のリストに戻れます。
+    </div>
+    <form id="loginForm">
+      <input type="text" id="loginName" placeholder="ユーザー名（例：miura）" required maxlength="30" autocomplete="off">
+      <button type="submit">このユーザーで始める</button>
+    </form>
+    <div class="existing-users" id="existingUsersBox" style="display:none;">
+      <h3>以前に使用したユーザー</h3>
+      <div id="existingUsersList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container" id="mainApp" style="display:none;">
+  <header>
+    <h1>★My お気に入り管理</h1>
+    <p>お気に入りページをいつでも素早くアクセス</p>
+  </header>
+
+  <div class="user-bar">
+    <span class="label">ユーザー：</span>
+    <span class="current-user" id="currentUserLabel">-</span>
+    <span class="spacer"></span>
+    <button id="switchUserBtn" type="button">ユーザーを切り替え</button>
+  </div>
+
+  <section class="form-section">
+    <h2>新しいお気に入りを登録</h2>
+    <form id="favForm">
+      <div class="form-group">
+        <label for="titleInput">タイトル</label>
+        <input type="text" id="titleInput" placeholder="例：Anthropic 公式サイト" required>
+      </div>
+      <div class="form-group">
+        <label for="urlInput">URL</label>
+        <input type="url" id="urlInput" placeholder="https://example.com" required>
+      </div>
+      <button type="submit" class="add-btn">＋ お気に入りに追加</button>
+    </form>
+  </section>
+
+  <section class="search-section">
+    <input type="text" id="searchInput" placeholder="タイトルで検索...">
+  </section>
+
+  <section class="list-section">
+    <div class="list-header">
+      <h2>登録済み一覧</h2>
+      <span class="count-badge" id="countBadge">0件</span>
+    </div>
+    <div id="favList"></div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // --- ストレージキー ---
+  const USERS_KEY = 'myFavorites_users';       // 登録済みユーザー名一覧
+  const CURRENT_USER_KEY = 'myFavorites_currentUser'; // 現在ログイン中のユーザー名
+  const DATA_PREFIX = 'myFavorites_data_';      // 各ユーザーのデータキー接頭辞
+
+  // --- DOM参照 ---
+  const loginOverlay = document.getElementById('loginOverlay');
+  const loginForm = document.getElementById('loginForm');
+  const loginName = document.getElementById('loginName');
+  const existingUsersBox = document.getElementById('existingUsersBox');
+  const existingUsersList = document.getElementById('existingUsersList');
+  const mainApp = document.getElementById('mainApp');
+  const currentUserLabel = document.getElementById('currentUserLabel');
+  const switchUserBtn = document.getElementById('switchUserBtn');
+
+  const favForm = document.getElementById('favForm');
+  const titleInput = document.getElementById('titleInput');
+  const urlInput = document.getElementById('urlInput');
+  const searchInput = document.getElementById('searchInput');
+  const favList = document.getElementById('favList');
+  const countBadge = document.getElementById('countBadge');
+  const toast = document.getElementById('toast');
+
+  // --- ユーザー管理 ---
+  function getUsers() {
+    try {
+      return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+    } catch { return []; }
+  }
+
+  function saveUsers(users) {
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
+
+  function addUserIfNew(name) {
+    const users = getUsers();
+    if (!users.includes(name)) {
+      users.push(name);
+      saveUsers(users);
+    }
+  }
+
+  function getCurrentUser() {
+    return localStorage.getItem(CURRENT_USER_KEY);
+  }
+
+  function setCurrentUser(name) {
+    localStorage.setItem(CURRENT_USER_KEY, name);
+  }
+
+  function clearCurrentUser() {
+    localStorage.removeItem(CURRENT_USER_KEY);
+  }
+
+  function getUserDataKey(name) {
+    return DATA_PREFIX + encodeURIComponent(name);
+  }
+
+  // --- お気に入り管理（現在のユーザーに対して）---
+  function loadFavorites() {
+    const user = getCurrentUser();
+    if (!user) return [];
+    try {
+      const data = localStorage.getItem(getUserDataKey(user));
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      console.error('読み込みエラー:', e);
+      return [];
+    }
+  }
+
+  function saveFavorites(favorites) {
+    const user = getCurrentUser();
+    if (!user) return;
+    try {
+      localStorage.setItem(getUserDataKey(user), JSON.stringify(favorites));
+    } catch (e) {
+      console.error('保存エラー:', e);
+      showToast('保存に失敗しました', 'error');
+    }
+  }
+
+  // --- ユーティリティ ---
+  function normalizeUrl(url) {
+    try {
+      const u = new URL(url);
+      return u.href.replace(/\/$/, '').toLowerCase();
+    } catch { return url.toLowerCase(); }
+  }
+
+  function formatDate(timestamp) {
+    const d = new Date(timestamp);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    return `${yyyy}/${mm}/${dd} ${hh}:${min}`;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  let toastTimer;
+  function showToast(message, type = '') {
+    clearTimeout(toastTimer);
+    toast.textContent = message;
+    toast.className = 'toast show ' + type;
+    toastTimer = setTimeout(() => {
+      toast.className = 'toast';
+    }, 2500);
+  }
+
+  // --- 画面描画 ---
+  function renderList() {
+    const favorites = loadFavorites();
+    const keyword = searchInput.value.trim().toLowerCase();
+    const filtered = keyword
+      ? favorites.filter(f => f.title.toLowerCase().includes(keyword))
+      : favorites;
+    filtered.sort((a, b) => b.createdAt - a.createdAt);
+
+    countBadge.textContent = `${filtered.length}件`;
+
+    if (filtered.length === 0) {
+      const message = keyword
+        ? '該当するお気に入りはありません'
+        : 'まだ登録されていません。上のフォームから追加してください！';
+      const icon = keyword ? '🔍' : '★';
+      favList.innerHTML = `
+        <div class="empty-state">
+          <span class="icon">${icon}</span>
+          <p>${message}</p>
+        </div>
+      `;
+      return;
+    }
+
+    favList.innerHTML = filtered.map(item => `
+      <div class="favorite-item" data-id="${item.id}">
+        <div class="favorite-content">
+          <a href="${escapeHtml(item.url)}" class="favorite-link" target="_blank" rel="noopener noreferrer">
+            <div class="favorite-title">${escapeHtml(item.title)}</div>
+            <div class="favorite-url">${escapeHtml(item.url)}</div>
+          </a>
+          <div class="favorite-date">登録日時：${formatDate(item.createdAt)}</div>
+        </div>
+        <button class="delete-btn" data-id="${item.id}">削除</button>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.dataset.id;
+        deleteFavorite(id);
+      });
+    });
+  }
+
+  function addFavorite(title, url) {
+    const favorites = loadFavorites();
+    const normalized = normalizeUrl(url);
+    if (favorites.some(f => normalizeUrl(f.url) === normalized)) {
+      showToast('このURLは既に登録されています', 'error');
+      return false;
+    }
+    favorites.push({
+      id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
+      title, url, createdAt: Date.now()
+    });
+    saveFavorites(favorites);
+    showToast('お気に入りに追加しました', 'success');
+    return true;
+  }
+
+  function deleteFavorite(id) {
+    if (!confirm('このお気に入りを削除しますか？')) return;
+    let favorites = loadFavorites();
+    favorites = favorites.filter(f => f.id !== id);
+    saveFavorites(favorites);
+    renderList();
+    showToast('削除しました', 'success');
+  }
+
+  // --- ログイン画面 ---
+  function renderLoginScreen() {
+    const users = getUsers();
+    if (users.length > 0) {
+      existingUsersBox.style.display = 'block';
+      existingUsersList.innerHTML = users.map(u =>
+        `<span class="user-chip" data-name="${escapeHtml(u)}">${escapeHtml(u)}</span>`
+      ).join('');
+      existingUsersList.querySelectorAll('.user-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          loginAs(chip.dataset.name);
+        });
+      });
+    } else {
+      existingUsersBox.style.display = 'none';
+    }
+    loginOverlay.style.display = 'flex';
+    mainApp.style.display = 'none';
+    setTimeout(() => loginName.focus(), 50);
+  }
+
+  function loginAs(name) {
+    name = String(name).trim();
+    if (!name) {
+      showToast('ユーザー名を入力してください', 'error');
+      return;
+    }
+    addUserIfNew(name);
+    setCurrentUser(name);
+    showMainApp();
+  }
+
+  function showMainApp() {
+    const user = getCurrentUser();
+    if (!user) {
+      renderLoginScreen();
+      return;
+    }
+    currentUserLabel.textContent = user;
+    loginOverlay.style.display = 'none';
+    mainApp.style.display = 'block';
+    searchInput.value = '';
+    renderList();
+  }
+
+  // --- イベント ---
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    loginAs(loginName.value);
+    loginName.value = '';
+  });
+
+  switchUserBtn.addEventListener('click', () => {
+    if (confirm('別のユーザーに切り替えますか？\n（現在のデータはそのまま保持されます）')) {
+      clearCurrentUser();
+      renderLoginScreen();
+    }
+  });
+
+  favForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = titleInput.value.trim();
+    const url = urlInput.value.trim();
+    if (!title || !url) {
+      showToast('タイトルとURLを入力してください', 'error');
+      return;
+    }
+    try { new URL(url); }
+    catch { showToast('正しいURL形式で入力してください', 'error'); return; }
+
+    if (addFavorite(title, url)) {
+      titleInput.value = '';
+      urlInput.value = '';
+      renderList();
+    }
+  });
+
+  searchInput.addEventListener('input', renderList);
+
+  // --- 起動 ---
+  if (getCurrentUser()) {
+    showMainApp();
+  } else {
+    renderLoginScreen();
+  }
+</script>
+</body>
+</html>
